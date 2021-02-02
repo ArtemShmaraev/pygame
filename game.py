@@ -132,14 +132,14 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 running = False
             keys = pygame.key.get_pressed()
-            if keys:
-                if keys[pygame.K_LEFT]:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
                     lvl, x, y = hod(lvl, x - 1, y, level_x, level_y, x, y)
-                elif keys[pygame.K_RIGHT]:
+                if event.key == pygame.K_RIGHT:
                     lvl, x, y = hod(lvl, x + 1, y, level_x, level_y, x, y)
-                elif keys[pygame.K_UP]:
+                if event.key == pygame.K_UP:
                     lvl, x, y = hod(lvl, x, y - 1, level_x, level_y, x, y)
-                elif keys[pygame.K_DOWN]:
+                if event.key == pygame.K_DOWN:
                     lvl, x, y = hod(lvl, x, y + 1, level_x, level_y, x, y)
                 player, level_x, level_y = generate_level(lvl)
 
@@ -149,3 +149,4 @@ if __name__ == '__main__':
         player_group.draw(screen)
         pygame.display.flip()
         pygame.display.update()
+
