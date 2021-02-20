@@ -89,7 +89,7 @@ q_nature = [["Вы бы хотели работать в сельском хоз
 
 
 def clear():
-    global count1, count2
+    global count1, count2, f
     for key in category.keys():
         category[key] = 0
     for key in people_people.keys():
