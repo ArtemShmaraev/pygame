@@ -2,7 +2,6 @@ import telebot
 from telebot import types
 import requests
 import json
-import os
 
 bot = telebot.TeleBot("1604480596:AAF_6vkLmUALP2OdaIcXTYfZYG_rNzhQinA")
 keyboard1 = telebot.types.ReplyKeyboardMarkup(True)
