@@ -4,7 +4,7 @@ import requests
 import json
 import os
 
-bot = telebot.TeleBot("Твой токен")
+bot = telebot.TeleBot("1604480596:AAF_6vkLmUALP2OdaIcXTYfZYG_rNzhQinA")
 keyboard1 = telebot.types.ReplyKeyboardMarkup(True)
 keyboard1.row("Да", "Нет")
 count1 = 0
@@ -101,7 +101,7 @@ q_art = [["Вам нравится театр?", "Искусство, развл
          ["Вы бы хотели придумывать рекламные компании?", "Маркетинг, Реклама, PR"],
          ["Вы бы хотели работать в сфере развлечений?", "Искусство, развлечения, масс-медиа"],
          ["Вы умеете вести соц. сети для продвижения?", "Маркетинг, Реклама, PR"],
-         ["Вы стеснительный человек?", "Искусство, развлечения, масс-медиа"],
+         ["Вы стеснительный человек?", "Искусство, раения, масс-медиа"],
          ["Вы разбираетесь в маркетинге?", "Маркетинг, Реклама, PR"]]
 q_nature = [["Вы бы хотели работать в сельском хозяйстве?", "Производство, сельское хозяйство"],
             ["Вам нравится научная деятельность?", "Наука, Образование", "Медицина, Фармацевтика"],
@@ -159,11 +159,14 @@ def get_result():
 
 
 def get_area(city):
-    response = requests.get(
-        f"https://api.hh.ru/suggests/areas?text={city}")
-    json_response = response.json()
-    c = json_response["items"][0]["id"]
-    return c
+    try:
+        response = requests.get(
+            f"https://api.hh.ru/suggests/areas?text={city}")
+        json_response = response.json()
+        c = json_response["items"][0]["id"]
+        return c
+    except IndexError:
+        return 0
 
 
 
@@ -178,26 +181,33 @@ def handle_loc(message):
     city = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]["metaDataProperty"]\
         ["GeocoderMetaData"]["Address"]["Components"][4]["name"]
     print(city)
-    params = {
-        'specialization': str(all[work]),  # Текст фильтра. В имени должно быть слово "Аналитик"
-        'area': get_area(city),  # Поиск ощуществляется по вакансиям города Москва
-        'page': 1,  # Индекс страницы поиска на HH
-        'per_page': 5  # Кол-во вакансий на 1 странице
-    }
+    region = get_area(city)
+    if region == 0:
+        s = "В вашем регионе вакансии не найдены, возможно вы сейчас находитесь за городом."
+        keyboard2 = telebot.types.ReplyKeyboardMarkup(True)
+        keyboard2.row("Сброс")
+        bot.send_message(message.chat.id, s, reply_markup=keyboard2)
+    else:
+        params = {
+            'specialization': str(all[work]),  # Текст фильтра. В имени должно быть слово "Аналитик"
+            'area': region,  # Поиск ощуществляется по вакансиям города Москва
+            'page': 1,  # Индекс страницы поиска на HH
+            'per_page': 5  # Кол-во вакансий на 1 странице
+        }
 
-    req = requests.get('https://api.hh.ru/vacancies', params)  # Посылаем запрос к API
-    print(req.url)
-    data = req.content.decode()  # Декодируем его ответ, чтобы Кириллица отображалась корректно
-    # Преобразуем текст ответа запроса в справочник Python
-    js = json.loads(data)
-    s = "Вакансии которые вам подходят:\n\n"
-    zapros = "https://belgorod.hh.ru/vacancy/"
-    for i in range(5):
-        s += js["items"][i]["name"] + "\n" + (zapros + str(js["items"][i]["id"])) + "\n\n"
+        req = requests.get('https://api.hh.ru/vacancies', params)  # Посылаем запрос к API
+        print(req.url)
+        data = req.content.decode()  # Декодируем его ответ, чтобы Кириллица отображалась корректно
+        # Преобразуем текст ответа запроса в справочник Python
+        js = json.loads(data)
+        s = "Вакансии которые вам подходят:\n\n"
+        zapros = "https://belgorod.hh.ru/vacancy/"
+        for i in range(5):
+            s += js["items"][i]["name"] + "\n" + (zapros + str(js["items"][i]["id"])) + "\n\n"
 
-    keyboard2 = telebot.types.ReplyKeyboardMarkup(True)
-    keyboard2.row("Сброс")
-    bot.send_message(message.chat.id, s, reply_markup=keyboard2)
+        keyboard2 = telebot.types.ReplyKeyboardMarkup(True)
+        keyboard2.row("Сброс")
+        bot.send_message(message.chat.id, s, reply_markup=keyboard2)
 
 
 @bot.message_handler(commands=['start'])
